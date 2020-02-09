@@ -9,13 +9,13 @@ class StageToRedshiftOperator(BaseOperator):
     template_fields = ('s3_key',)
     
     copy_sql = """
-        COPY '{}'
+        COPY {}
         FROM '{}'
         ACCESS_KEY_ID '{}'
         SECRET_ACCESS_KEY '{}'
         BLANKSASNULL EMPTYASNULL
         compupdate off region 'us-west-2'
-        format json 'auto';
+        format as json '{}';
     """
 
     @apply_defaults
@@ -28,6 +28,7 @@ class StageToRedshiftOperator(BaseOperator):
                  table="",
                  s3_bucket="",
                  s3_key="",
+                 format_json_path="",
                  *args, **kwargs):
 
         super(StageToRedshiftOperator, self).__init__(*args, **kwargs)
@@ -39,6 +40,7 @@ class StageToRedshiftOperator(BaseOperator):
         self.s3_bucket = s3_bucket
         self.s3_key = s3_key
         self.aws_credentials_id = aws_credentials_id
+        self.format_json_path = format_json_path
 
     def execute(self, context):
         aws_hook = AwsHook(self.aws_credentials_id)
@@ -55,7 +57,8 @@ class StageToRedshiftOperator(BaseOperator):
             self.table,
             s3_path,
             credentials.access_key,
-            credentials.secret_key
+            credentials.secret_key,
+            self.format_json_path
         )
         
-         redshift.run(formatted_sql)
+        redshift.run(formatted_sql)
