@@ -9,12 +9,13 @@ class LoadFactOperator(BaseOperator):
 
     insert_sql = """
     INSERT INTO songplays (
+            playid,
         start_time,
-           user_id,
+            userid,
              level,
-           song_id,
-         artist_id,
-        session_id,
+            songid,
+          artistid,
+         sessionid,
           location,
         user_agent
     )
