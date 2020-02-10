@@ -3,11 +3,12 @@ from airflow.contrib.hooks.aws_hook import AwsHook
 from airflow.models import BaseOperator
 from airflow.utils.decorators import apply_defaults
 
+
 class StageToRedshiftOperator(BaseOperator):
     ui_color = '#358140'
-    
+
     template_fields = ('s3_key',)
-    
+
     copy_sql = """
         COPY {}
         FROM '{}'
@@ -48,8 +49,7 @@ class StageToRedshiftOperator(BaseOperator):
         redshift = PostgresHook(postgres_conn_id=self.redshift_conn_id)
 
         self.log.info("Clearing data from destination Redshift table")
-        redshift.run("DELETE FROM {}".format(self.table))
-        
+        redshift.run("TRUNCATE {}".format(self.table))
         self.log.info("Copying data from S3 to Redshift")
         rendered_key = self.s3_key.format(**context)
         s3_path = "s3://{}/{}".format(self.s3_bucket, rendered_key)
@@ -60,5 +60,4 @@ class StageToRedshiftOperator(BaseOperator):
             credentials.secret_key,
             self.format_json_path
         )
-        
         redshift.run(formatted_sql)
